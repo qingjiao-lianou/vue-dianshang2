@@ -1,4 +1,4 @@
-import axios from '../utils/myaxios.js'
+import axios from '../utils/myaxios'
 
 export const loginRequest = (data) => {
     return axios({

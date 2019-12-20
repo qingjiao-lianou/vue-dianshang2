@@ -49,7 +49,7 @@ export default {
         if (valid) {
           loginRequest(this.loginForm)
             .then(res => {
-              console.log(res);
+              // console.log(res);
               if (res.data.meta.status === 200) {
                 // 存储token
                 localStorage.setItem('token',res.data.data.token)
