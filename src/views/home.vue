@@ -17,7 +17,7 @@
               <span>用户管理</span>
             </template>
 
-            <el-menu-item index="1-2">
+            <el-menu-item index="/home/users">
               <template slot="title">
                 <i class="el-icon-menu"></i>
                 <span>用户列表</span>
