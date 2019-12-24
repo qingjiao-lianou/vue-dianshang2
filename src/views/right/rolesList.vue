@@ -39,9 +39,10 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="24" v-show="scope.row.children.length === 0">
-                ------------------  空空如也  -------------------
-            </el-col>
+            <el-col
+              :span="24"
+              v-show="scope.row.children.length === 0"
+            >------------------ 空空如也 -------------------</el-col>
           </el-row>
         </template>
       </el-table-column>
@@ -54,7 +55,7 @@
             <el-button type="primary" icon="el-icon-edit" circle></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="授权" placement="top-start">
-            <el-button type="success" icon="el-icon-wind-power" circle></el-button>
+            <el-button type="success" icon="el-icon-wind-power" circle @click="treeRight"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top-start">
             <el-button type="danger" icon="el-icon-delete" circle></el-button>
@@ -62,23 +63,52 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 树形控件对话框 -->
+    <el-dialog :visible.sync="rightDialogVisible" width="50%" title="权限分配">
+      <el-tree
+        :data="rightList"
+        show-checkbox
+        node-key="id"
+        :default-expand-all="true"
+        :default-checked-keys="chkedArr"
+        :props="defaultProps"
+      ></el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="rightDialogVisible = false">取 消</el-button>
+        <el-button type="primary">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getRoleList, delRoleRight } from "@/api/roles_index.js";
+import { getRightList } from "@/api/right_index.js";
 export default {
   data() {
     return {
-      rolesList: []
+      rightDialogVisible: false,
+      rolesList: [],
+      rightList: [],
+      chkedArr:[],
+      defaultProps: {
+        label: "authName",
+        children: "children"
+      }
     };
   },
   methods: {
+    //   删除权限
     async delRight(row, rightId) {
       const res = await delRoleRight(row.id, rightId);
       console.log(res);
       row.children = res.data.data;
       this.$message.success(res.data.meta.msg);
+    },
+
+    // 树形权限组件
+    treeRight() {
+      this.rightDialogVisible = true;
     }
   },
   mounted() {
@@ -86,6 +116,11 @@ export default {
     getRoleList().then(res => {
       console.log(res);
       this.rolesList = res.data.data;
+    });
+    // 获取权限列表
+    getRightList("tree").then(res => {
+      console.log(res);
+      this.rightList = res.data.data;
     });
   }
 };
