@@ -6,3 +6,11 @@ export const getRoleList = () => {
         url:'roles',
     })
 }
+
+// 删除指定角色的权限
+export const delRoleRight = (roleId,rightId) => {
+    return axios({
+        url:`roles/${roleId}/rights/${rightId}`,
+        method:'delete'
+    })
+}

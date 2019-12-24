@@ -9,13 +9,42 @@
     <!-- 按钮 -->
     <el-button type="success">添加角色</el-button>
     <!-- 表格 -->
-    <el-table :data="rolesList" border style="width: 100%;margin-top:10px">
+    <el-table :data="rolesList" border style="width: 100%;margin-top:15px">
       <el-table-column type="expand">
-        <template slot-scope="">
-      
+        <template slot-scope="scope">
+          <el-row
+            v-for="first in scope.row.children"
+            :key="first.id"
+            style="margin-bottom:15px;border-bottom: 1px dashed #000;"
+          >
+            <el-col :span="4">
+              <el-tag closable type="success">{{first.authName}}</el-tag>
+            </el-col>
+            <el-col :span="20">
+              <el-row v-for="two in first.children" :key="two.id" style="margin-bottom:10px">
+                <el-col :span="4">
+                  <el-tag closable type="info">{{two.authName}}</el-tag>
+                </el-col>
+                <el-col :span="20">
+                  <el-tag
+                    closable
+                    type="warning"
+                    v-for="last in two.children"
+                    :key="last.id"
+                    style="margin-right:5px;margin-bottom:5px"
+                    @close="delRight(scope.row,last.id)"
+                  >{{last.authName}}</el-tag>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24" v-show="scope.row.children.length === 0">
+                ------------------  空空如也  -------------------
+            </el-col>
+          </el-row>
         </template>
       </el-table-column>
-      <el-table-column label="商品 ID" prop="id"></el-table-column>
       <el-table-column type="index" width="50"></el-table-column>
       <el-table-column prop="roleName" label="角色名称"></el-table-column>
       <el-table-column prop="roleDesc" label="描述"></el-table-column>
@@ -37,14 +66,23 @@
 </template>
 
 <script>
-import { getRoleList } from "@/api/roles_index.js";
+import { getRoleList, delRoleRight } from "@/api/roles_index.js";
 export default {
   data() {
     return {
       rolesList: []
     };
   },
+  methods: {
+    async delRight(row, rightId) {
+      const res = await delRoleRight(row.id, rightId);
+      console.log(res);
+      row.children = res.data.data;
+      this.$message.success(res.data.meta.msg);
+    }
+  },
   mounted() {
+    //   获取角色列表
     getRoleList().then(res => {
       console.log(res);
       this.rolesList = res.data.data;
