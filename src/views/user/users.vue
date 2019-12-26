@@ -27,7 +27,12 @@
       <el-table-column prop="mobile" label="电话"></el-table-column>
       <el-table-column label="用户状态">
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949" @change="userStatus(scope.row.id,scope.row.mg_state)"></el-switch>
+          <el-switch
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            @change="userStatus(scope.row.id,scope.row.mg_state)"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -137,7 +142,6 @@ import {
   ChangeStatus
 } from "@/api/user_index.js";
 import { getRoleList } from "@/api/roles_index.js";
-import { async } from "q";
 
 export default {
   data() {
@@ -292,7 +296,12 @@ export default {
               type: "success",
               message: "删除成功!"
             });
-            this.getusersData()
+            this.usersObj.pagenum =
+              Math.ceil((this.total - 1) / this.usersObj.pagesize) <
+              this.usersObj.pagenum
+                ? --this.usersObj.pagenum
+                : this.usersObj.pagenum;
+            this.getusersData();
           });
         })
         .catch(() => {
@@ -303,10 +312,10 @@ export default {
         });
     },
     // 修改用户状态
-    async userStatus(id,type){
-       const res = await ChangeStatus(id,type)
-       console.log(res);
-       this.$message.success(res.data.meta.msg);
+    async userStatus(id, type) {
+      const res = await ChangeStatus(id, type);
+      console.log(res);
+      this.$message.success(res.data.meta.msg);
     }
   },
 
