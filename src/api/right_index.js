@@ -6,3 +6,10 @@ export const getRightList = (type) => {
         url:`rights/${type}`
     })
 }
+
+// 获取左侧菜单
+export const getLeftMenu = () => {
+    return axios({
+        url:'menus'
+    })
+}

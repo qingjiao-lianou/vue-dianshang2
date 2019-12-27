@@ -7,7 +7,7 @@
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 按钮 -->
-    <el-button type="success">添加角色</el-button>
+    <el-button type="success" @click="addDialogFormVisible = true">添加角色</el-button>
     <!-- 表格 -->
     <el-table :data="rolesList" border style="width: 100%;margin-top:15px">
       <el-table-column type="expand">
@@ -92,15 +92,36 @@
         <el-button type="primary" @click="roleAuthID">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 添加角色对话框 -->
+    <el-dialog title="添加角色" :visible.sync="addDialogFormVisible">
+      <el-form :model="addForm" :label-width="'80px'" :rules="rules" ref="addForm">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addForm.roleName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="addForm.roleDesc" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleAddRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getRoleList, delRoleRight, roleAuth } from "@/api/roles_index.js";
+import {
+  getRoleList,
+  delRoleRight,
+  roleAuth,
+  addRole
+} from "@/api/roles_index.js";
 import { getRightList } from "@/api/right_index.js";
 export default {
   data() {
     return {
+      addDialogFormVisible: false,
       roleId: "",
       sign: 0,
       rightDialogVisible: false,
@@ -111,12 +132,26 @@ export default {
       defaultProps: {
         label: "authName",
         children: "children"
+      },
+      // 添加角色参数
+      addForm: {
+        roleName: "",
+        roleDesc: ""
+      },
+      // 验证规则
+      rules: {
+        roleName: [
+          { required: true, message: "请输入角色名称", trigger: "blur" }
+        ],
+        roleDesc: [
+          { required: true, message: "请输入角色描述", trigger: "blur" }
+        ]
       }
     };
   },
   methods: {
+    //   获取角色列表
     refresh() {
-      //   获取角色列表
       getRoleList().then(res => {
         console.log(res);
         this.rolesList = res.data.data;
@@ -167,7 +202,7 @@ export default {
         }
       });
     },
-    // 授权
+    // 角色授权
     async roleAuthID() {
       let arr = this.$refs.tree.getCheckedNodes();
       console.log(arr);
@@ -186,11 +221,28 @@ export default {
       // console.log(res);
       this.$message.success("授权成功");
       this.rightDialogVisible = false;
-      this.refresh()
+      this.refresh();
+    },
+    // 添加角色
+    handleAddRole() {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          addRole(this.addForm).then(res => {
+            console.log(res);
+            this.addDialogFormVisible = false;
+            this.refresh();
+            this.$message.success("添加角色成功");
+            this.addForm.roleName = "";
+            this.addForm.roleDesc = "";
+          });
+        } else {
+          this.$message.warning("请填写完整内容");
+        }
+      });
     }
   },
   mounted() {
-    this.refresh()
+    this.refresh();
   }
 };
 </script>
