@@ -17,7 +17,7 @@
       >
         <el-button slot="append" icon="el-icon-search" @click="GoodsList"></el-button>
       </el-input>
-      <el-button type="success" style="margin-left:10px">添加商品</el-button>
+      <el-button type="success" style="margin-left:10px" @click="$router.push({ name: 'add'})">添加商品</el-button>
     </div>
     <!-- 商品列表 -->
     <el-table :data="goodsList" border style="width: 100%">
