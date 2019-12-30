@@ -57,7 +57,9 @@
               <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
+          <el-tab-pane label="商品内容" name="4">
+            <quillEditor></quillEditor>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
       <el-button type="success" @click="addGoods">添加商品</el-button>
@@ -65,6 +67,10 @@
   </div>
 </template>
 <script>
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+import {  quillEditor  } from 'vue-quill-editor'
 import { getGoodsCate } from "@/api/cate_index.js";
 export default {
   data() {
@@ -135,7 +141,10 @@ export default {
       console.log(res);
       this.goodsCate = res.data.data;
     });
-  }
+  },
+  components: {
+     quillEditor 
+}
 };
 </script>
 <style lang="less" scoped>
