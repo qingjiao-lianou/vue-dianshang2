@@ -32,48 +32,109 @@
               <el-input v-model="goodsForm.goods_number"></el-input>
             </el-form-item>
             <el-form-item label="商品分类">
-              <el-cascader :options="goodsCate" change-on-select :props="cateProps" v-model="goodsForm.goods_cat"></el-cascader>
+              <el-cascader
+                :options="goodsCate"
+                change-on-select
+                :props="cateProps"
+                v-model="goodsForm.goods_cat"
+              ></el-cascader>
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
           <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
-          <el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
+          <el-tab-pane label="商品图片" name="3">
+            <el-upload
+              class="upload-demo"
+              action="http://localhost:8888/api/private/v1/upload"
+              :headers="headerToken()"
+              :on-success="handleSuccess"
+              :on-remove="handleRemove"
+              :before-upload="handleBefore"
+              :file-list="fileList"
+              list-type="picture"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+              <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            </el-upload>
+          </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
         </el-tabs>
       </el-form>
+      <el-button type="success" @click="addGoods">添加商品</el-button>
     </el-card>
   </div>
 </template>
 <script>
-import {getGoodsCate} from '@/api/cate_index.js'
+import { getGoodsCate } from "@/api/cate_index.js";
 export default {
   data() {
     return {
-      cateProps:{
-        value:'cat_id',
-        label:'cat_name',
-        children:'children'
+      fileList: [],
+      cateProps: {
+        value: "cat_id",
+        label: "cat_name",
+        children: "children"
       },
       activeName: "0",
       goodsForm: {
         attrs: [],
         pics: [],
         goods_introduce: "",
-        goods_weight: "",
-        goods_number: "",
-        goods_price: "",
+        goods_weight: 0,
+        goods_number: 0,
+        goods_price: 0,
         goods_cat: "",
         goods_name: ""
       },
-      goodsCate:[],
+      goodsCate: []
     };
   },
-  methods: {},
-  mounted(){
+  methods: {
+    // 上傳文件之前觸發的函數
+    handleBefore(file) {
+      console.log(file);
+      if(file.type.indexOf('image/') !== 0){
+       this.$message.warning("请選擇正確格式");
+        return false  //此時會觸發 handleRemove
+      }
+    },
+    // 上传文件成功时触发的函数
+    handleSuccess(res) {
+      // console.log(res);
+      this.goodsForm.pics.push({
+        pic: res.data.tmp_path
+      });
+    },
+    // 移出文件触发的函数
+    handleRemove(file, fileList) {
+      // console.log(file);
+      // console.log(fileList);
+      if(!file.response){
+        return
+      }
+      for (let i = 0; i < this.goodsForm.pics.length; i++) {
+        if (this.goodsForm.pics[i].pic === file.response.data.tmp_path) {
+          this.goodsForm.pics.splice(i, 1);
+        }
+      }
+    },
+    // 设置请求头
+    headerToken() {
+      var myToken = localStorage.getItem("token");
+      return {
+        Authorization: myToken
+      };
+    },
+    // 添加商品
+    addGoods() {
+      console.log(this.goodsForm);
+    }
+  },
+  mounted() {
     getGoodsCate(3).then(res => {
       console.log(res);
-      this.goodsCate = res.data.data
-    })
+      this.goodsCate = res.data.data;
+    });
   }
 };
 </script>

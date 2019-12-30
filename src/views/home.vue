@@ -50,7 +50,7 @@ export default {
   },
   mounted() {
     getLeftMenu().then(res => {
-      console.log(res);
+      // console.log(res);
       this.leftMenu = res.data.data;
     });
   }
