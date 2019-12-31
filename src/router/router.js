@@ -7,6 +7,7 @@ import Users from '@/views/user/users.vue'
 import Rights from '@/views/right/rightList.vue'
 import Roles from '@/views/right/rolesList.vue'
 import Goods from '@/views/goods/goods.vue'
+import Reports from '@/views/reports.vue'
 import Add from '@/views/goods/goodsAdd.vue'
 import List from '@/views/goods/goodsList.vue'
 
@@ -35,6 +36,11 @@ export default new VueRouter({
           name: 'welcome',
           path: 'welcome',
           component: Welcome
+        },
+        {
+          name: 'reports',
+          path: 'reports',
+          component:Reports
         },
         {
           name: 'users',
