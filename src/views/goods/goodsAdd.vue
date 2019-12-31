@@ -17,10 +17,15 @@
     <!-- 表单(标签页) -->
     <el-card class="box-card" style="margin-top:10px">
       <el-form label-width="80px">
-        <el-tabs v-model="activeName" tab-position="left">
+        <el-tabs
+          v-model="activeName"
+          tab-position="left"
+          :before-leave="beforeLeave"
+          @tab-click="handleClick"
+        >
           <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称">
-              <el-input v-model="goodsForm. goods_name"></el-input>
+              <el-input v-model="goodsForm.goods_name"></el-input>
             </el-form-item>
             <el-form-item label="商品价格">
               <el-input v-model="goodsForm.goods_price"></el-input>
@@ -40,7 +45,20 @@
               ></el-cascader>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
+          <el-tab-pane label="商品参数" name="1">
+            <el-checkbox-group
+              v-model="item.attr_vals"
+              v-for="item in goodsParams"
+              :key="item.attr_id"
+            >
+              <el-checkbox
+                :label="item2"
+                v-for="(item2,index) in item.attr_vals"
+                :key="index"
+                border
+              ></el-checkbox>
+            </el-checkbox-group>
+          </el-tab-pane>
           <el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
           <el-tab-pane label="商品图片" name="3">
             <el-upload
@@ -58,7 +76,7 @@
             </el-upload>
           </el-tab-pane>
           <el-tab-pane label="商品内容" name="4">
-            <quillEditor></quillEditor>
+            <quillEditor v-model="goodsForm.goods_introduce"></quillEditor>
           </el-tab-pane>
         </el-tabs>
       </el-form>
@@ -67,14 +85,18 @@
   </div>
 </template>
 <script>
-import 'quill/dist/quill.core.css'
-import 'quill/dist/quill.snow.css'
-import 'quill/dist/quill.bubble.css'
-import {  quillEditor  } from 'vue-quill-editor'
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+import { quillEditor } from "vue-quill-editor";
 import { getGoodsCate } from "@/api/cate_index.js";
+import { getGoodsParams } from "@/api/params_index.js";
+import { addGoods } from "@/api/goods_index.js";
 export default {
   data() {
     return {
+      checkList: [],
+      goodsParams: [],
       fileList: [],
       cateProps: {
         value: "cat_id",
@@ -99,9 +121,9 @@ export default {
     // 上傳文件之前觸發的函數
     handleBefore(file) {
       console.log(file);
-      if(file.type.indexOf('image/') !== 0){
-       this.$message.warning("请選擇正確格式");
-        return false  //此時會觸發 handleRemove
+      if (file.type.indexOf("image/") !== 0) {
+        this.$message.warning("请選擇正確格式");
+        return false; //此時會觸發 handleRemove
       }
     },
     // 上传文件成功时触发的函数
@@ -115,8 +137,8 @@ export default {
     handleRemove(file, fileList) {
       // console.log(file);
       // console.log(fileList);
-      if(!file.response){
-        return
+      if (!file.response) {
+        return;
       }
       for (let i = 0; i < this.goodsForm.pics.length; i++) {
         if (this.goodsForm.pics[i].pic === file.response.data.tmp_path) {
@@ -132,19 +154,57 @@ export default {
       };
     },
     // 添加商品
-    addGoods() {
+    async addGoods() {
+      for (let i = 0; i < this.goodsParams.length; i++) {
+        let attr_id = this.goodsParams[i].attr_id;
+        for (let j = 0; j < this.goodsParams[i].attr_vals.length; j++) {
+          this.goodsForm.attrs.push({
+            attr_id,
+            attr_value: this.goodsParams[i].attr_vals[j]
+          });
+        }
+      }
+      this.goodsForm.goods_cat = this.goodsForm.goods_cat.join(",");
       console.log(this.goodsForm);
+      const res = await addGoods(this.goodsForm);
+      console.log(res);
+      this.$message.warning("添加成功");
+      this.$router.push({ name: "list" });
+    },
+    // 切换标签页之前的钩子
+    beforeLeave(activeName, oldActiveName) {
+      // console.log(activeName, oldActiveName);
+      if (activeName === "1" || activeName === "2") {
+        if (this.goodsForm.goods_cat.length !== 3) {
+          this.$message.warning("请选择商品分类");
+          this.activeName = "0";
+          return false;
+        }
+      }
+    },
+    async handleClick() {
+      if (this.activeName == "1") {
+        let res = await getGoodsParams(this.goodsForm.goods_cat[2], "many");
+        console.log(res);
+        this.goodsParams = res.data.data;
+        for (let i = 0; i < this.goodsParams.length; i++) {
+          this.goodsParams[i].attr_vals = this.goodsParams[i].attr_vals.split(
+            ","
+          );
+        }
+      } else if (this.activeName == "2") {
+      }
     }
   },
   mounted() {
     getGoodsCate(3).then(res => {
-      console.log(res);
+      // console.log(res);
       this.goodsCate = res.data.data;
     });
   },
   components: {
-     quillEditor 
-}
+    quillEditor
+  }
 };
 </script>
 <style lang="less" scoped>
