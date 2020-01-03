@@ -25,7 +25,9 @@
       <el-table-column prop="goods_name" label="商品名称" width="700"></el-table-column>
       <el-table-column prop="goods_price" label="商品价格" width="80"></el-table-column>
       <el-table-column prop="goods_weight" label="商品重量" width="80"></el-table-column>
-      <el-table-column prop="add_time" label="创建时间" width="150"></el-table-column>
+      <el-table-column prop="add_time" label="创建时间" width="180">
+        <template slot-scope="scope">{{scope.row.add_time | timeFilters}}</template>
+      </el-table-column>
       <el-table-column label="操作">
         <template>
           <el-tooltip class="item" effect="dark" content="编辑" placement="top-start">
@@ -54,6 +56,7 @@
 </template>
 <script>
 import { getGoodsList } from "@/api/goods_index.js";
+import { timeFilters } from "../../utils/mymoment";
 export default {
   data() {
     return {
@@ -91,6 +94,11 @@ export default {
 
   mounted() {
     this.GoodsList();
+  },
+
+  // 事件过滤
+  filters: {
+    timeFilters
   }
 };
 </script>
